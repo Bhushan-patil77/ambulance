@@ -1,6 +1,8 @@
 package com.emergency.ambulance.ambulance.controller;
 
 import com.emergency.ambulance.ambulance.dto.AmbulanceDto;
+import com.emergency.ambulance.ambulance.dto.AmbulanceLoginDto;
+import com.emergency.ambulance.ambulance.dto.AmbulanceLoginResponseDto;
 import com.emergency.ambulance.ambulance.dto.CreateAmbulanceDto;
 import com.emergency.ambulance.ambulance.service.AmbulanceService;
 import com.emergency.ambulance.common.response.ApiResponse;
@@ -27,5 +29,12 @@ public class AmbulanceController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ResponseUtil.success("Ambulance created successfully", createdAmbulance));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AmbulanceLoginResponseDto>> login(@Valid @RequestBody AmbulanceLoginDto loginDto) {
+        AmbulanceLoginResponseDto responseDto = ambulanceService.login(loginDto);
+        return ResponseEntity
+                .ok(ResponseUtil.success("Ambulance login successful", responseDto));
     }
 }
