@@ -9,6 +9,7 @@ import com.emergency.ambulance.common.response.ApiResponse;
 import com.emergency.ambulance.common.response.ResponseUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +25,7 @@ public class AmbulanceController {
     private final AmbulanceService ambulanceService;
 
     @PostMapping("/createAmbulance")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<AmbulanceDto>> createAmbulance(@Valid @RequestBody CreateAmbulanceDto createAmbulanceDto) {
         AmbulanceDto createdAmbulance = ambulanceService.createAmbulance(createAmbulanceDto);
         return ResponseEntity

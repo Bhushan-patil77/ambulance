@@ -44,7 +44,7 @@ public class Admin {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @Column(name = "role", nullable = false, updatable = false)
     private Role role;
 
     @Column(name = "password", nullable = false, length = 255)

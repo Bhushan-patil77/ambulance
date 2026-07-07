@@ -4,5 +4,6 @@ public enum Role {
     CITIZEN,
     DRIVER,
     AMBULANCE,
-    ADMIN
+    ADMIN,
+    SUPER_ADMIN
 }
