@@ -1,7 +1,9 @@
 package com.emergency.ambulance.driver.controller;
 
+import com.emergency.ambulance.ambulance.dto.AmbulanceDto;
 import com.emergency.ambulance.common.response.ApiResponse;
 import com.emergency.ambulance.common.response.ResponseUtil;
+import com.emergency.ambulance.driver.dto.AssignDriverDto;
 import com.emergency.ambulance.driver.dto.CreateDriverDto;
 import com.emergency.ambulance.driver.dto.DriverDto;
 import com.emergency.ambulance.driver.dto.DriverLoginDto;
@@ -37,5 +39,12 @@ public class DriverController {
         DriverDto responseDto = driverService.login(loginDto);
         return ResponseEntity
                 .ok(ResponseUtil.success("Driver login successful", responseDto));
+    }
+
+    @PostMapping("/assignDriver")
+    public ResponseEntity<ApiResponse<AmbulanceDto>> assignDriver(@Valid @RequestBody AssignDriverDto assignDriverDto) {
+        AmbulanceDto responseDto = driverService.assignDriver(assignDriverDto);
+        return ResponseEntity
+                .ok(ResponseUtil.success("Driver assigned successfully", responseDto));
     }
 }

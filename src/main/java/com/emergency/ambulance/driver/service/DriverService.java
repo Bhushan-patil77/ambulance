@@ -1,9 +1,15 @@
 package com.emergency.ambulance.driver.service;
 
+import com.emergency.ambulance.ambulance.dto.AmbulanceDto;
+import com.emergency.ambulance.ambulance.dto.AmbulanceMapper;
+import com.emergency.ambulance.ambulance.entity.Ambulance;
+import com.emergency.ambulance.ambulance.repository.AmbulanceRepository;
 import com.emergency.ambulance.common.enums.Role;
 import com.emergency.ambulance.common.exception.BadRequestException;
+import com.emergency.ambulance.common.exception.ResourceNotFoundException;
 import com.emergency.ambulance.common.exception.UnauthorizedException;
 import com.emergency.ambulance.common.utility.PasswordUtil;
+import com.emergency.ambulance.driver.dto.AssignDriverDto;
 import com.emergency.ambulance.driver.dto.CreateDriverDto;
 import com.emergency.ambulance.driver.dto.DriverDto;
 import com.emergency.ambulance.driver.dto.DriverLoginDto;
@@ -18,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DriverService {
 
+    private final AmbulanceRepository ambulanceRepository;
+    private final AmbulanceMapper ambulanceMapper;
     private final DriverRepository driverRepository;
     private final DriverMapper driverMapper;
     private final PasswordUtil passwordUtil;
@@ -50,5 +58,18 @@ public class DriverService {
         }
 
         return driverMapper.toDto(driver);
+    }
+
+    @Transactional
+    public AmbulanceDto assignDriver(AssignDriverDto assignDriverDto) {
+        Ambulance ambulance = ambulanceRepository.findById(assignDriverDto.getAmbulanceId())
+                .orElseThrow(() -> new ResourceNotFoundException("Ambulance not found with id: " + assignDriverDto.getAmbulanceId()));
+
+        Driver driver = driverRepository.findById(assignDriverDto.getDriverId())
+                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + assignDriverDto.getDriverId()));
+
+        ambulance.setDriver(driver);
+        Ambulance savedAmbulance = ambulanceRepository.save(ambulance);
+        return ambulanceMapper.toDto(savedAmbulance);
     }
 }
