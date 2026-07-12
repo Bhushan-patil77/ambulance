@@ -11,4 +11,5 @@ public class AmbulanceLoginResponseDto {
     private String tokenType;
     private long expiresIn;
     private String role;
+    private Long ambulanceId;
 }

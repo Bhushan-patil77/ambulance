@@ -45,6 +45,7 @@ public class SecurityConfig {
                         "/swagger-ui/index.html", // Common entry point for Swagger UI
                         "/api/admins/login",
                         "/api/ambulances/login",
+                        "/api/ambulances/getAmbulances",
                         "/drivers/login",
                         "/drivers/assignDriver"
                 ).permitAll()
