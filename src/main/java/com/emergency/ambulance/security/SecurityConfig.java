@@ -2,6 +2,7 @@ package com.emergency.ambulance.security;
 
 import com.emergency.ambulance.admin.service.AdminUserDetailsService;
 import com.emergency.ambulance.ambulance.service.AmbulanceUserDetailsService;
+import com.emergency.ambulance.citizen.service.CitizenUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +28,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AmbulanceUserDetailsService ambulanceUserDetailsService;
     private final AdminUserDetailsService adminUserDetailsService;
+    private final CitizenUserDetailsService citizenUserDetailsService;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -37,6 +39,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(adminAuthenticationProvider())
             .authenticationProvider(ambulanceAuthenticationProvider())
+            .authenticationProvider(citizenAuthenticationProvider())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                         "/v3/api-docs/**", // Allow access to OpenAPI 3 documentation
@@ -45,6 +48,8 @@ public class SecurityConfig {
                         "/swagger-ui/index.html", // Common entry point for Swagger UI
                         "/api/admins/login",
                         "/api/ambulances/login",
+                        "/api/citizens/registerCitizen",
+                        "/api/citizens/login",
                         "/api/ambulances/getAmbulances",
                         "/drivers/login",
                         "/drivers/assignDriver"
@@ -71,7 +76,18 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationProvider citizenAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(citizenUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager() {
-        return new ProviderManager(adminAuthenticationProvider(), ambulanceAuthenticationProvider());
+        return new ProviderManager(
+                adminAuthenticationProvider(),
+                ambulanceAuthenticationProvider(),
+                citizenAuthenticationProvider()
+        );
     }
 }
