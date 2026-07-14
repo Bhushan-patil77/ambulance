@@ -42,6 +42,7 @@ public class SecurityConfig {
             .authenticationProvider(citizenAuthenticationProvider())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                "/ws/**",
                         "/v3/api-docs/**", // Allow access to OpenAPI 3 documentation
                         "/swagger-ui/**",
                         "/swagger-ui.html", // Specific HTML file for Swagger UI

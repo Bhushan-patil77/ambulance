@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface AmbulanceRepository extends JpaRepository<Ambulance, Long> {
     Optional<Ambulance> findByAmbulanceNumber(String ambulanceNumber);
+    Optional<Ambulance> findFirstByDriverId(Long driverId);
 
     @Query(value = """
             SELECT

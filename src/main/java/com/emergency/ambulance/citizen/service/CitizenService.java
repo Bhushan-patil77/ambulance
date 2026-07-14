@@ -9,10 +9,20 @@ import com.emergency.ambulance.citizen.entity.Citizen;
 import com.emergency.ambulance.citizen.repository.CitizenRepository;
 import com.emergency.ambulance.common.enums.Role;
 import com.emergency.ambulance.common.exception.BadRequestException;
+import com.emergency.ambulance.common.exception.ResourceNotFoundException;
 import com.emergency.ambulance.common.exception.UnauthorizedException;
 import com.emergency.ambulance.common.utility.PasswordUtil;
+import com.emergency.ambulance.emergency.dto.CreateEmergencyRequestDto;
+import com.emergency.ambulance.emergency.dto.EmergencyCreatedResponseDto;
+import com.emergency.ambulance.emergency.entity.Emergency;
+import com.emergency.ambulance.emergency.entity.EmergencyLifeCycle;
+import com.emergency.ambulance.emergency.repository.EmergencyLifeCycleRepository;
+import com.emergency.ambulance.emergency.repository.EmergencyRepository;
 import com.emergency.ambulance.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,11 +33,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CitizenService {
 
+    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
+
     private final CitizenRepository citizenRepository;
     private final CitizenMapper citizenMapper;
     private final PasswordUtil passwordUtil;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final EmergencyRepository emergencyRepository;
+    private final EmergencyLifeCycleRepository emergencyLifeCycleRepository;
 
     @Transactional
     public CitizenDto registerCitizen(CreateCitizenDto createCitizenDto) {
@@ -99,4 +113,41 @@ public class CitizenService {
                 citizen.getId()
         );
     }
+
+        @Transactional
+        public EmergencyCreatedResponseDto createEmergency(CreateEmergencyRequestDto requestDto) {
+        Citizen citizen = citizenRepository.findById(requestDto.getCitizenId()).orElseThrow(() -> new ResourceNotFoundException("Citizen not found with id: " + requestDto.getCitizenId()));
+
+        Point mishapPoint = GEOMETRY_FACTORY.createPoint(
+            new Coordinate(
+                requestDto.getMishapLongitude(),
+                requestDto.getMishapLatitude()
+            )
+        );
+        mishapPoint.setSRID(4326);
+
+        Emergency emergency = new Emergency();
+        emergency.setCitizen(citizen);
+        emergency.setRequestedAmbulanceType(requestDto.getRequestedAmbulanceType());
+        emergency.setMishapLocation(mishapPoint);
+        emergency.setEmergencyLevel(requestDto.getEmergencyLevel());
+
+        Emergency savedEmergency = emergencyRepository.save(emergency);
+
+        EmergencyLifeCycle emergencyLifeCycle = new EmergencyLifeCycle();
+        emergencyLifeCycle.setEmergency(savedEmergency);
+        emergencyLifeCycle.setLocationPoint(mishapPoint);
+        emergencyLifeCycleRepository.save(emergencyLifeCycle);
+
+            return new EmergencyCreatedResponseDto(
+                savedEmergency.getId(),
+                citizen.getId(),
+                savedEmergency.getRequestedAmbulanceType(),
+                savedEmergency.getEmergencyLevel(),
+                    requestDto.getMishapLatitude(),
+                    requestDto.getMishapLongitude(),
+                savedEmergency.getStatus(),
+                savedEmergency.getCreatedAt()
+            );
+        }
 }
